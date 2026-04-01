@@ -1,0 +1,15 @@
+package com.barbie.dreamworld_api;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
+@SpringBootApplication
+public class DreamworldApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DreamworldApiApplication.class, args);
+	}
+
+}
+ //as convencoes do statuscode, documentaçao,
