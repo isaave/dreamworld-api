@@ -14,6 +14,8 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Barbie Dreamworld API")
                         .version("1.0")
-                        .description("API do projeto Barbie para o Senac TSI"));
+                        .description("Esta API foi desenvolvida para o gerenciamento completo da coleção de Barbies, " +
+                                "incluindo o controle de acessórios, eventos temáticos e integração com a Dreamhouse. " +
+                                "Projeto acadêmico para o curso de Sistemas para Internet - Senac."));
     }
 }
