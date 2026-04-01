@@ -7,19 +7,21 @@ import java.util.stream.Collectors;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import com.barbie.dreamworld_api.model.Barbie;
 import com.barbie.dreamworld_api.repository.BarbieRepository;
 import com.barbie.dreamworld_api.exceptions.BarbieNotFoundException;
 
+// Importações para Documentação (Swagger)
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Barbie", description = "Endpoints para gerenciar a coleção de Barbies")
 public class BarbieController {
 
     private final BarbieRepository repository;
@@ -28,10 +30,9 @@ public class BarbieController {
         this.repository = repository;
     }
 
-    // Listar todas com Links (HATEOAS)
+    @Operation(summary = "Listar todas as Barbies", description = "Retorna uma lista com HATEOAS")
     @GetMapping("/barbies")
     public CollectionModel<EntityModel<Barbie>> all() {
-
         List<EntityModel<Barbie>> barbies = repository.findAll().stream()
                 .map(barbie -> EntityModel.of(barbie,
                         linkTo(methodOn(BarbieController.class).one(barbie.getId())).withSelfRel(),
@@ -41,16 +42,20 @@ public class BarbieController {
         return CollectionModel.of(barbies, linkTo(methodOn(BarbieController.class).all()).withSelfRel());
     }
 
-    // Cadastrar nova Barbie
+    @Operation(summary = "Cadastrar nova Barbie", description = "Cria um novo registro no banco de dados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Barbie criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro na requisição (JSON inválido)")
+    })
     @PostMapping("/barbies")
+    @ResponseStatus(HttpStatus.CREATED) // Convenção: 201 para novos recursos
     public Barbie newBarbie(@RequestBody Barbie newBarbie) {
         return repository.save(newBarbie);
     }
 
-    // Buscar uma única (com exceção personalizada)
+    @Operation(summary = "Buscar por ID", description = "Retorna os detalhes de uma única Barbie")
     @GetMapping("/barbies/{id}")
     public EntityModel<Barbie> one(@PathVariable Long id) {
-
         Barbie barbie = repository.findById(id)
                 .orElseThrow(() -> new BarbieNotFoundException(id));
 
@@ -59,7 +64,7 @@ public class BarbieController {
                 linkTo(methodOn(BarbieController.class).all()).withRel("barbies"));
     }
 
-    // Atualizar (Replace)
+    @Operation(summary = "Atualizar Barbie", description = "Substitui os dados de uma Barbie existente")
     @PutMapping("/barbies/{id}")
     public Barbie replaceBarbie(@RequestBody Barbie newBarbie, @PathVariable Long id) {
         return repository.findById(id)
@@ -74,8 +79,16 @@ public class BarbieController {
                 });
     }
 
+    @Operation(summary = "Deletar Barbie", description = "Remove permanentemente uma Barbie pelo ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Barbie deletada com sucesso")
+    })
     @DeleteMapping("/barbies/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // Convenção: 204 quando não há conteúdo para retornar
     public void deleteBarbie(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            throw new BarbieNotFoundException(id);
+        }
         repository.deleteById(id);
     }
 }
