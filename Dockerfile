@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy build descriptors first for better cache
 COPY pom.xml .
-COPY .mvn .mvn
+COPY .mvn/ .mvn
 COPY mvnw .
 RUN chmod +x ./mvnw
 
